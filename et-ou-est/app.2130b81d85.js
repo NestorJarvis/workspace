@@ -155,8 +155,6 @@
 
   var sentenceEl = document.getElementById("sentence");
   var feedbackEl = document.getElementById("feedback");
-  var checkBtn = document.getElementById("check");
-  var nextBtn = document.getElementById("next");
   var statsEl = document.getElementById("stats");
 
   function render() {
@@ -185,8 +183,6 @@
     });
     feedbackEl.textContent = "";
     feedbackEl.className = "feedback";
-    checkBtn.disabled = true;
-    nextBtn.hidden = true;
     updateStats();
   }
 
@@ -194,15 +190,16 @@
     if (state.locked) return;
     state.exercise.slots[slotIndex].chosen = word;
     var wrap = sentenceEl.querySelector('.slot[data-slot="' + slotIndex + '"]');
+    // Nettoie l'état visuel du trou (utile quand on corrige après une erreur)
     wrap.querySelectorAll(".choice").forEach(function (b) {
-      b.classList.toggle("selected", b.dataset.word === word);
+      b.classList.remove("selected", "correct", "wrong");
+      if (b.dataset.word === word) b.classList.add("selected");
     });
     var allChosen = state.exercise.slots.every(function (s) { return s.chosen !== null; });
-    checkBtn.disabled = !allChosen;
+    if (allChosen) autoCheck();
   }
 
-  function check() {
-    if (state.locked) return;
+  function autoCheck() {
     state.locked = true;
     var allCorrect = true;
     state.exercise.slots.forEach(function (s, i) {
@@ -210,6 +207,9 @@
       var correct = s.chosen === s.answer;
       if (correct) {
         state.stats.ok++;
+        wrap.querySelectorAll(".choice").forEach(function (b) {
+          if (b.dataset.word === s.answer) b.classList.add("correct");
+        });
       } else {
         allCorrect = false;
         wrap.querySelectorAll(".choice").forEach(function (b) {
@@ -217,18 +217,20 @@
           if (b.dataset.word === s.chosen) b.classList.add("wrong");
         });
       }
-      state.stats.total++;
     });
-    state.stats.streak = allCorrect ? state.stats.streak + 1 : 0;
-    state.stats.best = Math.max(state.stats.best, state.stats.streak);
-    feedbackEl.textContent = allCorrect
-      ? "Bravo ! Tout est correct."
-      : "Réponse(s) fausse(s) en rouge, la bonne en vert.";
-    feedbackEl.className = "feedback " + (allCorrect ? "ok" : "bad");
-    checkBtn.disabled = true;
-    nextBtn.hidden = false;
-    nextBtn.focus();
-    updateStats();
+    state.stats.total += state.exercise.slots.length;
+    if (allCorrect) {
+      state.stats.streak++;
+      state.stats.best = Math.max(state.stats.best, state.stats.streak);
+      feedbackEl.textContent = "Bravo !";
+      feedbackEl.className = "feedback ok";
+      updateStats();
+      setTimeout(function () { next(); }, 1000);
+    } else {
+      feedbackEl.textContent = "Réponse(s) fausse(s) en rouge, la bonne en vert. Corrige !";
+      feedbackEl.className = "feedback bad";
+      state.locked = false; // laisse l'utilisateur corriger
+    }
   }
 
   function updateStats() {
@@ -242,8 +244,6 @@
     render();
   }
 
-  checkBtn.addEventListener("click", check);
-  nextBtn.addEventListener("click", next);
 
   state.exercise = buildExercise();
   render();
