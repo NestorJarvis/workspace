@@ -135,6 +135,21 @@
       }
       return { text: "" };
     });
+    // Capitalise la 1re lettre alphabétique et garantit une ponctuation finale.
+    var capitalized = false;
+    parts.forEach(function (p) {
+      if (p.text && !capitalized) {
+        p.text = p.text.replace(/^[a-zà-ÿ]/, function (c) { return c.toUpperCase(); });
+        capitalized = true;
+      }
+    });
+    var lastText = null;
+    parts.forEach(function (p) { if (p.text !== undefined && p.text !== "") lastText = p; });
+    if (lastText) {
+      var tail = lastText.text.replace(/\s+$/, "");
+      if (!/[.?!]$/.test(tail)) lastText.text = tail + ".";
+      else lastText.text = tail;
+    }
     return { parts: parts, slots: slots };
   }
 
