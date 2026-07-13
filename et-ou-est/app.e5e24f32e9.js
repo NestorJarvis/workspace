@@ -121,7 +121,7 @@
     var slots = [];
     var used = {}; // évite de répéter un même mot dans un exercice
     var parts = tpl.map(function (part) {
-      if (typeof part === "string") return { text: part };
+      if (part.t !== undefined) return { text: part.t };
       if (part.s) {
         slots.push({ answer: part.s, chosen: null });
         return { slot: slots.length - 1 };
