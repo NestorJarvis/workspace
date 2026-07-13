@@ -2,26 +2,103 @@
   "use strict";
 
   // --- Banques de mots (français simple, mobile) ---
+  // Régénéré via ChatGPT (invité) le 2026-07-13 : phrases grammaticalement
+  // correctes, accords masc/fem respectés, "c'est" uniquement devant un
+  // article indéfini, coordinations "et" logiques.
   var BANKS = {
-    nouns: ["un chat", "un chien", "un livre", "une fleur", "une maison",
-            "un oiseau", "une mère", "un père", "la lune", "le soleil",
-            "un arbre", "une table", "un roi", "une reine", "un ami",
-            "une amie", "un bébé", "le vent"],
-    places: ["dans la maison", "sur la table", "devant la porte", "sous l'arbre",
-             "dans le jardin", "près du fleuve", "derrière le mur", "sur le toit"],
-    professions: ["médecin", "professeur", "élève", "pompier", "cuisinier",
-                  "chanteur", "écrivain", "peintre", "jardinier", "musicien"],
+    nouns: [
+      "chat", "chien", "livre", "vélo", "arbre", "stylo", "ballon", "oiseau"
+    ],
+
+    places: [
+      "à la maison",
+      "à l'école",
+      "au parc",
+      "au jardin",
+      "à la bibliothèque",
+      "au bureau"
+    ],
+
+    professions: [
+      "médecin",
+      "professeur",
+      "boulanger",
+      "artiste",
+      "musicien",
+      "cuisinier"
+    ],
+
     subjPron: ["il", "elle"],
-    verbs3: ["court", "saute", "chante", "pleure", "rit", "dort", "mange",
-             "boit", "pense", "écoute", "parle", "travaille"],
-    subjMasc: ["le chat", "le chien", "le livre", "mon père", "le roi",
-               "il", "le cheval", "le poisson"],
-    adjMasc: ["grand", "petit", "rouge", "bleu", "noir", "clair", "propre",
-              "vieux", "content", "gentil", "rapide"],
-    subjFem: ["la maison", "la fleur", "ma mère", "elle", "la lune",
-              "la table", "la porte", "la rivière"],
-    adjFem: ["grande", "petite", "rouge", "bleue", "noire", "claire", "propre",
-             "vieille", "contente", "gentille", "rapide"]
+
+    verbs3: [
+      "mange",
+      "court",
+      "dort",
+      "chante",
+      "travaille",
+      "joue"
+    ],
+
+    subjMasc: [
+      "le chat",
+      "le chien",
+      "le livre",
+      "le vélo",
+      "l'arbre",
+      "le garçon",
+      "le voisin"
+    ],
+
+    adjMasc: [
+      "grand",
+      "petit",
+      "content",
+      "fatigué",
+      "rapide",
+      "calme",
+      "heureux",
+      "gentil"
+    ],
+
+    subjFem: [
+      "la fleur",
+      "la maison",
+      "la voiture",
+      "la fille",
+      "la voisine",
+      "la porte"
+    ],
+
+    adjFem: [
+      "grande",
+      "petite",
+      "contente",
+      "fatiguée",
+      "rapide",
+      "calme",
+      "heureuse",
+      "gentille"
+    ],
+
+    detNounMasc: [
+      "un chat",
+      "un chien",
+      "un livre",
+      "un vélo",
+      "un arbre",
+      "un ballon",
+      "un oiseau",
+      "un garçon"
+    ],
+
+    detNounFem: [
+      "une fleur",
+      "une maison",
+      "une voiture",
+      "une fille",
+      "une porte",
+      "une voisine"
+    ]
   };
 
   // --- Gabarits : chaque partie est
@@ -29,23 +106,168 @@
   //     {b:"banque"} -> mot tiré au sort
   //     {s:"est"|"et"} -> trou (réponse attendue)
   // Les combinaisons de gabarits donnent 1 à 3 trous par phrase.
+  // Régénéré via ChatGPT (invité) le 2026-07-13.
   var TEMPLATES = [
-    // 1 trou : est  (c'est + nom)
-    [{ t: "C'est " }, { s: "est" }, { b: "nouns" }, { t: "." }],
-    // 1 trou : et   (nom et nom)
-    [{ b: "nouns" }, { t: " " }, { s: "et" }, { t: " " }, { b: "nouns" }, { t: "." }],
-    // 1 trou : est  (sujet est + lieu)
-    [{ b: "nouns" }, { t: " " }, { s: "est" }, { t: " " }, { b: "places" }, { t: "." }],
-    // 1 trou : est  (pronom est + métier)
-    [{ b: "subjPron" }, { t: " " }, { s: "est" }, { t: " " }, { b: "professions" }, { t: "." }],
-    // 2 trous : est, et  (sujet masc est adj et adj)
-    [{ b: "subjMasc" }, { t: " " }, { s: "est" }, { t: " " }, { b: "adjMasc" }, { t: " et " }, { b: "adjMasc" }, { t: "." }],
-    // 2 trous : est, et  (sujet fem est adj et adj)
-    [{ b: "subjFem" }, { t: " " }, { s: "est" }, { t: " " }, { b: "adjFem" }, { t: " et " }, { b: "adjFem" }, { t: "." }],
-    // 3 trous : est, et, est  (c'est X et c'est Y)
-    [{ t: "C'est " }, { s: "est" }, { b: "nouns" }, { t: " " }, { s: "et" }, { t: " c'est " }, { s: "est" }, { b: "nouns" }, { t: "." }],
-    // 2 trous : est, et  (pron est adj et pron verbe)
-    [{ b: "subjPron" }, { t: " " }, { s: "est" }, { t: " " }, { b: "adjMasc" }, { t: " et " }, { b: "subjPron" }, { t: " " }, { b: "verbs3" }, { t: "." }]
+    // 1 trou
+
+    [
+      { t: "Le chat " },
+      { s: "est" },
+      { t: " noir." }
+    ],
+
+    [
+      { b: "subjMasc" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "adjMasc" },
+      { t: "." }
+    ],
+
+    [
+      { b: "subjFem" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "adjFem" },
+      { t: "." }
+    ],
+
+    [
+      { t: "C'" },
+      { s: "est" },
+      { t: " " },
+      { b: "detNounMasc" },
+      { t: "." }
+    ],
+
+    [
+      { t: "C'" },
+      { s: "est" },
+      { t: " " },
+      { b: "detNounFem" },
+      { t: "." }
+    ],
+
+    [
+      { b: "subjMasc" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "places" },
+      { t: "." }
+    ],
+
+    [
+      { b: "subjFem" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "places" },
+      { t: "." }
+    ],
+
+    // 2 trous
+
+    [
+      { b: "subjMasc" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "adjMasc" },
+      { t: " " },
+      { s: "et" },
+      { t: " gentil." }
+    ],
+
+    [
+      { b: "subjFem" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "adjFem" },
+      { t: " " },
+      { s: "et" },
+      { t: " calme." }
+    ],
+
+    [
+      { b: "detNounMasc" },
+      { t: " " },
+      { s: "et" },
+      { t: " " },
+      { b: "detNounFem" },
+      { t: " sont ici." }
+    ],
+
+    [
+      { b: "subjPron" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "places" },
+      { t: " " },
+      { s: "et" },
+      { t: " travaille." }
+    ],
+
+    [
+      { b: "subjMasc" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "professions" },
+      { t: " " },
+      { s: "et" },
+      { t: " travaille ici." }
+    ],
+
+    // 3 trous
+
+    [
+      { b: "subjMasc" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "adjMasc" },
+      { t: " " },
+      { s: "et" },
+      { t: " " },
+      { b: "adjMasc" },
+      { t: " " },
+      { s: "et" },
+      { t: " sourit." }
+    ],
+
+    [
+      { b: "subjFem" },
+      { t: " " },
+      { s: "est" },
+      { t: " " },
+      { b: "adjFem" },
+      { t: " " },
+      { s: "et" },
+      { t: " " },
+      { b: "adjFem" },
+      { t: " " },
+      { s: "et" },
+      { t: " chante." }
+    ],
+
+    [
+      { t: "C'" },
+      { s: "est" },
+      { t: " " },
+      { b: "detNounMasc" },
+      { t: " " },
+      { s: "et" },
+      { t: " " },
+      { b: "detNounFem" },
+      { t: " " },
+      { s: "et" },
+      { t: " ils sont prêts." }
+    ]
   ];
 
   var state = {
