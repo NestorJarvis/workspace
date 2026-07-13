@@ -213,7 +213,6 @@
       } else {
         allCorrect = false;
         wrap.querySelectorAll(".choice").forEach(function (b) {
-          if (b.dataset.word === s.answer) b.classList.add("correct");
           if (b.dataset.word === s.chosen) b.classList.add("wrong");
         });
       }
@@ -227,7 +226,7 @@
       updateStats();
       setTimeout(function () { next(); }, 1000);
     } else {
-      feedbackEl.textContent = "Réponse(s) fausse(s) en rouge, la bonne en vert. Corrige !";
+      feedbackEl.textContent = "Réponse fausse en rouge. Corrige !";
       feedbackEl.className = "feedback bad";
       state.locked = false; // laisse l'utilisateur corriger
     }
