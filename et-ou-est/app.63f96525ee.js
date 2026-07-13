@@ -387,4 +387,13 @@
 
   state.exercise = buildExercise();
   render();
+
+  // --- Affichage de la version (source de vérité : version.json, jamais en cache) ---
+  fetch('./version.json', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      var vEl = document.getElementById('appver');
+      if (vEl && j && j.version) vEl.textContent = 'v' + j.version;
+    })
+    .catch(function () { /* fallback : data-version statique déjà affiché dans le footer */ });
 })();
